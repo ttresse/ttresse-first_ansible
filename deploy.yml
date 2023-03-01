@@ -1,0 +1,38 @@
+---
+- name: "Apache Installation"
+  hosts: prod
+  # permet d'autoriser l elevation de droit
+  become: true
+  pre_tasks:
+    - name: "Install Packages"
+      package:
+        name: '{{ item }}'
+        state: present
+      # faire l action si cette condition est remplie
+      loop:
+        - epel-release
+        - git
+        - wget
+      when: ansible_distribution=="CentOS"
+    - name: "Download pip script"
+      get_url:
+        url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+        dest: /tmp/get-pip.py
+    - name: "Install pip"
+      command: python2.7 /tmp/get-pip.py
+    - name: "Install Docker Python"
+      pip: name=docker-py 
+  tasks:
+  - name: "Creating Directory"
+    template:
+            src: index.html.j2
+            dest: /home/admin/index.html
+  - name: "Create Apache Container"
+    docker_container:
+      name: myapacheapp
+      image: httpd
+      volumes:
+        - /home/admin/index.html:/usr/local/apache2/htdocs/index.html
+      ports:
+      # Publish container port 80 as host port 80
+        - "80:80"

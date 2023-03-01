@@ -1,0 +1,5 @@
+---
+#file: group_vars/prod
+ansible_user: admin
+ansible_password: admin
+nom_hote: "Le site de Titi"
